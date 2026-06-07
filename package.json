@@ -1,0 +1,10 @@
+{
+  "name": "the-bone-core",
+  "version": "1.0.0",
+  "dependencies": {
+    "react": "18.x",
+    "react-native": "0.74.x",
+    "react-native-svg": "latest",
+    "@react-native-community/slider": "latest"
+  }
+}
