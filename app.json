@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "The Bone Core",
+    "slug": "the-bone-core",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "android": {
+      "package": "com.sief.bonecore"
+    }
+  }
+}
