@@ -1,0 +1,45 @@
+# الاعتماديات الحزمية المحملة محلياً (لا ترفعها لأنها ثقيلة جداً ويتم تحميلها عبر package.json)
+node_modules/
+/node_modules
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ملفات بيئة العمل المؤقتة والكاش لـ Expo و Metro Bundler
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+.metro/
+.metro-health-check*
+
+# ملفات تتبع وسجلات الأخطاء (Logs)
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.log
+
+# ملفات البناء الأصلي للأنظمة (Native Builds) والمفاتيح التشفيرية للأندرويد والآيفون
+/ios
+/android
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.keystore
+
+# ملفات إعدادات بيئة العمل السرية (المفاتيح والمقابس الخاصة بقواعد البيانات)
+.env
+.env.local
+.env.*.local
+
+# ملفات النظام المؤقتة لأجهزة الماك والويندوز
+.DS_Store
+Thumbs.db
+*.pem
+
+# ملفات كاش لـ TypeScript
+*.tsbuildinfo
