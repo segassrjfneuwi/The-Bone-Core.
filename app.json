@@ -4,27 +4,14 @@
     "slug": "the-bone-core-pro",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#060c1f",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#060c1f"
-    },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.bonecore.pro"
-    },
     "android": {
-      "package": "com.bonecore.pro",
+      "package": "com.saif.bonecorepro",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "backgroundColor": "#060c1f",
-        "foregroundImage": "./assets/android-icon-foreground.png"
+        "backgroundColor": "#060c1f"
       }
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
     }
   }
 }
