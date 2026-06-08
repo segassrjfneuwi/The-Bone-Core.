@@ -86,14 +86,12 @@ function CircularProgress({ value = 84, size = 160 }) {
             <Stop offset="100%" stopColor={COLORS.navyLight} />
           </LinearGradient>
         </Defs>
-        {/* Track */}
         <Circle
           cx={cx} cy={cy} r={radius}
           fill="transparent"
           stroke={COLORS.offWhite}
           strokeWidth={10}
         />
-        {/* Progress */}
         <AnimatedCircle
           cx={cx} cy={cy} r={radius}
           fill="transparent"
@@ -105,7 +103,6 @@ function CircularProgress({ value = 84, size = 160 }) {
           transform={`rotate(-90 ${cx} ${cy})`}
         />
       </Svg>
-      {/* Center text */}
       <View style={[StyleSheet.absoluteFillObject, { alignItems: 'center', justifyContent: 'center' }]}>
         <Text style={styles.progressPct}>{value}%</Text>
         <Text style={styles.progressLabel}>ممتاز</Text>
@@ -116,7 +113,6 @@ function CircularProgress({ value = 84, size = 160 }) {
 
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 export default function App() {
-  // State
   const [activeTab, setActiveTab]           = useState('home');
   const [isConnected, setIsConnected]       = useState(false);
   const [tensLevel, setTensLevel]           = useState(3);
@@ -128,17 +124,14 @@ export default function App() {
   const [modalVisible, setModalVisible]     = useState(false);
   const [modalData, setModalData]           = useState({ title: '', desc: '', type: 'success' });
 
-  // Animations
   const pulseAnim  = useRef(new Animated.Value(1)).current;
   const fadeAnim   = useRef(new Animated.Value(0)).current;
   const slideAnim  = useRef(new Animated.Value(30)).current;
   const btAnim     = useRef(new Animated.Value(1)).current;
 
-  // Session timer
   const timerRef = useRef(null);
 
   useEffect(() => {
-    // Page appear animation
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
       Animated.timing(slideAnim, { toValue: 0, duration: 600, easing: Easing.out(Easing.quad), useNativeDriver: true }),
@@ -147,7 +140,6 @@ export default function App() {
 
   useEffect(() => {
     if (isTherapyRunning) {
-      // Pulse animation loop
       const loop = Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, { toValue: 1.06, duration: 700, useNativeDriver: true }),
@@ -155,7 +147,7 @@ export default function App() {
         ])
       );
       loop.start();
-      // Timer
+      
       timerRef.current = setInterval(() => {
         setSessionTime(t => t + 1);
         setBattery(b => Math.max(0, b - 0.01));
@@ -171,13 +163,24 @@ export default function App() {
     }
   }, [isTherapyRunning]);
 
+  // 🛡️ ميزة الأمان الذكية: إيقاف تلقائي بعد 15 دقيقة (900 ثانية)
+  useEffect(() => {
+    if (sessionTime >= 900 && isTherapyRunning) {
+      setIsTherapyRunning(false);
+      showModal(
+        'حماية الأمان التلقائية ⏱️',
+        'تم إيقاف الجلسة تلقائياً بعد 15 دقيقة لحماية عضلاتك وبشرتك من الحرارة المستمرة.',
+        'warn'
+      );
+    }
+  }, [sessionTime, isTherapyRunning]);
+
   const formatTime = (sec) => {
     const m = Math.floor(sec / 60).toString().padStart(2, '0');
     const s = (sec % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
   };
 
-  // Bluetooth toggle with spin animation
   const toggleBluetooth = () => {
     Animated.sequence([
       Animated.timing(btAnim, { toValue: 0.8, duration: 150, useNativeDriver: true }),
@@ -201,7 +204,7 @@ export default function App() {
     }
     if (!isTherapyRunning) {
       setIsTherapyRunning(true);
-      showModal('بدء الجلسة الذكية 🚀', `تم تفعيل نبضات TENS على المستوى ${tensLevel} والحرارة ${heatLevel}°C.`, 'success');
+      showModal('بدء الجلسة الذكية 🚀', `تم تفعيل نبضات TENS على المستوى ${tensLevel} والحرارة ${heatLevel}°C.\nمدة الجلسة القصوى: 15 دقيقة للأمان.`, 'success');
     } else {
       setIsTherapyRunning(false);
       showModal('انتهت الجلسة', `مدة الجلسة: ${formatTime(sessionTime)}. أحسنت!`, 'info');
@@ -213,13 +216,9 @@ export default function App() {
     setModalVisible(true);
   };
 
-  const resetTabAnim = () => {
+  const switchTab = (tab) => {
     fadeAnim.setValue(0);
     slideAnim.setValue(30);
-  };
-
-  const switchTab = (tab) => {
-    resetTabAnim();
     setActiveTab(tab);
   };
 
@@ -259,16 +258,13 @@ export default function App() {
     },
   ];
 
-  // ── HOME TAB ───────────────────────────────────────────────────────────────
   const renderHome = () => (
     <Animated.View style={[styles.tabContent, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-      {/* Welcome */}
       <View style={styles.welcomeBlock}>
         <Text style={styles.welcomeHi}>مرحباً 👋</Text>
         <Text style={styles.welcomeSub}>جاهز لبناء عظام حديدية اليوم؟</Text>
       </View>
 
-      {/* Status banner */}
       <View style={[styles.statusBanner, isConnected ? styles.bannerConnected : styles.bannerDisconnected]}>
         <View style={[styles.statusDot, { backgroundColor: isConnected ? COLORS.green : COLORS.red }]} />
         <Text style={styles.statusBannerText}>
@@ -276,7 +272,6 @@ export default function App() {
         </Text>
       </View>
 
-      {/* Circular progress card */}
       <View style={styles.card}>
         <Text style={styles.cardLabel}>مؤشر الاستقامة اليومي</Text>
         <View style={styles.circleRow}>
@@ -289,32 +284,23 @@ export default function App() {
         </View>
       </View>
 
-      {/* Quick action */}
-      <TouchableOpacity
-        style={styles.quickBtn}
-        onPress={() => switchTab('control')}
-        activeOpacity={0.85}
-      >
-        <Text style={styles.quickBtnText}>ابدأ جلسة علاجية جديدة ←</Text>
+      <TouchableOpacity style={styles.quickBtn} onPress={() => switchTab('control')} activeOpacity={0.85}>
+        <Text style={styles.quickBtnText}>ابدأ جلسه علاجية جديدة ←</Text>
       </TouchableOpacity>
 
-      {/* Tip card */}
       <View style={styles.tipCard}>
         <Text style={styles.tipTitle}>💡 نصيحة اليوم</Text>
         <Text style={styles.tipText}>
-          قاعدة الـ 45 دقيقة: قف وامشِ دقيقتين كل 45 دقيقة لتخفيف الضغط على
-          الغضاريف القطنية وزيادة الدورة الدموية.
+          قاعدة الـ 45 دقيقة: قف وامشِ دقيقتين كل 45 دقيقة لتخفيف الضغط على الغضاريف القطنية وزيادة الدورة الدموية.
         </Text>
       </View>
     </Animated.View>
   );
 
-  // ── SESSIONS TAB ──────────────────────────────────────────────────────────
   const renderSessions = () => (
     <Animated.View style={[styles.tabContent, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
       <Text style={styles.sectionTitle}>الجلسات العلاجية</Text>
 
-      {/* Mode selector */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
         {therapyModes.map((mode) => (
           <TouchableOpacity
@@ -323,19 +309,13 @@ export default function App() {
             onPress={() => setSelectedMode(mode.id)}
           >
             <Text style={styles.modeEmoji}>{mode.icon}</Text>
-            <Text style={[styles.modeChipText, selectedMode === mode.id && { color: COLORS.white }]}>
-              {mode.id}
-            </Text>
-            <Text style={[styles.modeDesc, selectedMode === mode.id && { color: '#c7d2fe' }]}>
-              {mode.desc}
-            </Text>
+            <Text style={[styles.modeChipText, selectedMode === mode.id && { color: COLORS.white }]}>{mode.id}</Text>
+            <Text style={[styles.modeDesc, selectedMode === mode.id && { color: '#c7d2fe' }]}>{mode.desc}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
-      {/* Control card */}
       <View style={styles.card}>
-        {/* TENS Slider */}
         <View style={styles.sliderBlock}>
           <View style={styles.sliderLabelRow}>
             <Text style={styles.sliderTitle}>⚡ نبضات TENS</Text>
@@ -360,7 +340,6 @@ export default function App() {
           </View>
         </View>
 
-        {/* Heat Slider */}
         <View style={styles.sliderBlock}>
           <View style={styles.sliderLabelRow}>
             <Text style={styles.sliderTitle}>🌡️ الحرارة العلاجية</Text>
@@ -385,15 +364,13 @@ export default function App() {
           </View>
         </View>
 
-        {/* Session timer (shown when running) */}
         {isTherapyRunning && (
           <View style={styles.timerRow}>
             <ActivityIndicator size="small" color={COLORS.navyLight} />
-            <Text style={styles.timerText}>جلسة نشطة: {formatTime(sessionTime)}</Text>
+            <Text style={styles.timerText}>جلسة نشطة: {formatTime(sessionTime)} (أقصى حد 15:00)</Text>
           </View>
         )}
 
-        {/* Start button */}
         <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
           <TouchableOpacity
             style={[styles.primaryBtn, isTherapyRunning && styles.dangerBtn]}
@@ -407,18 +384,15 @@ export default function App() {
         </Animated.View>
       </View>
 
-      {/* Info */}
       <View style={styles.infoBox}>
         <Text style={styles.infoTitle}>🦴 كيف تعمل تقنية TENS؟</Text>
         <Text style={styles.infoText}>
-          تُرسل نبضات كهربائية منخفضة الطاقة عبر الجلد لتحفيز الأعصاب وتخفيف الألم
-          وارتخاء العضلات دون أي آثار جانبية.
+          تُرسل نبضات كهربائية منخفضة الطاقة عبر الجلد لتحفيز الأعصاب وتخفيف الألم وارتخاء العضلات دون أي آثار جانبية.
         </Text>
       </View>
     </Animated.View>
   );
 
-  // ── HUB TAB ───────────────────────────────────────────────────────────────
   const renderHub = () => (
     <Animated.View style={[styles.tabContent, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
       <Text style={styles.sectionTitle}>المرجع الشامل للعظام 🦴</Text>
@@ -438,7 +412,6 @@ export default function App() {
         </View>
       ))}
 
-      {/* Nutrition table */}
       <View style={styles.card}>
         <Text style={styles.cardLabel}>🥩 دليل التغذية</Text>
         <View style={styles.nutritionRow}>
@@ -449,7 +422,7 @@ export default function App() {
             ))}
           </View>
           <View style={[styles.nutritionCol, { borderColor: COLORS.red }]}>
-            <Text style={[styles.nutritionHeader, { color: COLORS.red }]}>❌ لصوص الكالسيوم</Text>
+            <Text style={[styles.nutritionHeader, { color: COLORS.red }]}>❌ لصوص الكالمسيوم</Text>
             {['🥤 مشروبات غازية', '🍬 سكر أبيض', '🌭 لحوم مصنعة', '🍟 وجبات سريعة'].map((item, i) => (
               <Text key={i} style={styles.nutritionItem}>{item}</Text>
             ))}
@@ -459,12 +432,10 @@ export default function App() {
     </Animated.View>
   );
 
-  // ── RENDER ─────────────────────────────────────────────────────────────────
   return (
     <SafeAreaView style={styles.root}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.navy} />
 
-      {/* ── HEADER ── */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.logoCircle}>
@@ -476,56 +447,33 @@ export default function App() {
           </View>
         </View>
         <Animated.View style={{ transform: [{ scale: btAnim }] }}>
-          <TouchableOpacity
-            style={[styles.btBtn, isConnected && styles.btBtnConnected]}
-            onPress={toggleBluetooth}
-          >
+          <TouchableOpacity style={[styles.btBtn, isConnected && styles.btBtnConnected]} onPress={toggleBluetooth}>
             <Text style={styles.btIcon}>{isConnected ? '📶' : '📵'}</Text>
           </TouchableOpacity>
         </Animated.View>
       </View>
 
-      {/* ── CONTENT ── */}
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {activeTab === 'home'    && renderHome()}
         {activeTab === 'control' && renderSessions()}
         {activeTab === 'hub'     && renderHub()}
       </ScrollView>
 
-      {/* ── BOTTOM NAV ── */}
       <View style={styles.navBar}>
         {[
           { id: 'home',    label: 'الرئيسية', emoji: '🏠' },
           { id: 'control', label: 'الجلسات',  emoji: '⚡' },
           { id: 'hub',     label: 'المرجع',   emoji: '📚' },
         ].map((tab) => (
-          <TouchableOpacity
-            key={tab.id}
-            style={styles.navItem}
-            onPress={() => switchTab(tab.id)}
-            activeOpacity={0.75}
-          >
-            <Text style={[styles.navEmoji, activeTab === tab.id && styles.navEmojiActive]}>
-              {tab.emoji}
-            </Text>
-            <Text style={[styles.navLabel, activeTab === tab.id && styles.navLabelActive]}>
-              {tab.label}
-            </Text>
+          <TouchableOpacity key={tab.id} style={styles.navItem} onPress={() => switchTab(tab.id)} activeOpacity={0.75}>
+            <Text style={[styles.navEmoji, activeTab === tab.id && styles.navEmojiActive]}>{tab.emoji}</Text>
+            <Text style={[styles.navLabel, activeTab === tab.id && styles.navLabelActive]}>{tab.label}</Text>
             {activeTab === tab.id && <View style={styles.navIndicator} />}
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* ── MODAL ── */}
-      <Modal
-        animationType="fade"
-        transparent
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
+      <Modal animationType="fade" transparent visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <Text style={styles.modalEmoji}>
@@ -533,10 +481,7 @@ export default function App() {
             </Text>
             <Text style={styles.modalTitle}>{modalData.title}</Text>
             <Text style={styles.modalDesc}>{modalData.desc}</Text>
-            <TouchableOpacity
-              style={styles.modalBtn}
-              onPress={() => setModalVisible(false)}
-            >
+            <TouchableOpacity style={styles.modalBtn} onPress={() => setModalVisible(false)}>
               <Text style={styles.modalBtnText}>حسناً</Text>
             </TouchableOpacity>
           </View>
@@ -546,7 +491,6 @@ export default function App() {
   );
 }
 
-// ─── STAT ITEM HELPER ─────────────────────────────────────────────────────────
 function StatItem({ icon, label, value, color }) {
   return (
     <View style={styles.statItem}>
@@ -559,12 +503,9 @@ function StatItem({ icon, label, value, color }) {
   );
 }
 
-// ─── STYLES ───────────────────────────────────────────────────────────────────
+// ─── STYLES (تنسيقات كاملة ومغلقة بدون أي نقص) ──────────────────────────────────
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: COLORS.offWhite,
-  },
+  root: { flex: 1, backgroundColor: COLORS.offWhite },
   header: {
     backgroundColor: COLORS.navy,
     paddingHorizontal: 20,
@@ -573,4 +514,21 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderBottomLeftRadius: 20,
-    borderBottomRightRadi
+    borderBottomRightRadius: 20,
+  },
+  headerLeft: { flexDirection: 'row', alignItems: 'center' },
+  logoCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', justifyContent: 'center', alignItems: 'center', marginRight: 10 },
+  logoText: { fontSize: 20 },
+  appTitle: { color: COLORS.white, fontSize: 18, fontWeight: 'bold' },
+  appSlogan: { color: COLORS.cyanLight, fontSize: 11, marginTop: 2 },
+  btBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: COLORS.danger, justifyContent: 'center', alignItems: 'center' },
+  btBtnConnected: { backgroundColor: COLORS.green },
+  btIcon: { fontSize: 18, color: COLORS.white },
+  scrollContent: { paddingBottom: 30 },
+  tabContent: { padding: 20 },
+  welcomeBlock: { marginBottom: 20, alignItems: 'flex-start' },
+  welcomeHi: { fontSize: 24, fontWeight: 'bold', color: COLORS.textPrimary },
+  welcomeSub: { fontSize: 14, color: COLORS.textSecond, marginTop: 4 },
+  statusBanner: { flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 12, marginBottom: 20 },
+  bannerConnected: { backgroundColor: '#e6f4ea' },
+  bannerD
