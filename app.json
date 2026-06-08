@@ -1,12 +1,30 @@
 {
   "expo": {
-    "name": "The Bone Core",
-    "slug": "the-bone-core",
+    "name": "The Bone Core Pro",
+    "slug": "the-bone-core-pro",
     "version": "1.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#060c1f",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#060c1f"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bonecore.pro"
+    },
     "android": {
-      "package": "com.sief.bonecore"
+      "package": "com.bonecore.pro",
+      "adaptiveIcon": {
+        "backgroundColor": "#060c1f",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     }
   }
 }
