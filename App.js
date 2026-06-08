@@ -12,27 +12,12 @@ import {
   Easing,
   ActivityIndicator,
   Modal,
-  Platform,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 
 const { width, height } = Dimensions.get('window');
 
-// ─── ICONS (SVG-based, no external icon library needed) ──────────────────────
-const IconBluetooth = ({ size = 22, color = '#fff' }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Svg.Path
-      d="M6.5 6.5L17.5 17.5M17.5 6.5L6.5 17.5M12 3L12 21M12 3L17.5 8.5L12 14M12 14L6.5 19.5"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </Svg>
-);
-
-// ─── THEME ────────────────────────────────────────────────────────────────────
 const COLORS = {
   navy:       '#0f1f4b',
   navyMid:    '#1e3a8a',
@@ -53,7 +38,6 @@ const COLORS = {
   danger:     '#dc2626',
 };
 
-// ─── ANIMATED CIRCULAR PROGRESS ──────────────────────────────────────────────
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 function CircularProgress({ value = 84, size = 160 }) {
@@ -86,12 +70,7 @@ function CircularProgress({ value = 84, size = 160 }) {
             <Stop offset="100%" stopColor={COLORS.navyLight} />
           </LinearGradient>
         </Defs>
-        <Circle
-          cx={cx} cy={cy} r={radius}
-          fill="transparent"
-          stroke={COLORS.offWhite}
-          strokeWidth={10}
-        />
+        <Circle cx={cx} cy={cy} r={radius} fill="transparent" stroke={COLORS.offWhite} strokeWidth={10} />
         <AnimatedCircle
           cx={cx} cy={cy} r={radius}
           fill="transparent"
@@ -111,7 +90,6 @@ function CircularProgress({ value = 84, size = 160 }) {
   );
 }
 
-// ─── MAIN APP ─────────────────────────────────────────────────────────────────
 export default function App() {
   const [activeTab, setActiveTab]           = useState('home');
   const [isConnected, setIsConnected]       = useState(false);
@@ -128,8 +106,7 @@ export default function App() {
   const fadeAnim   = useRef(new Animated.Value(0)).current;
   const slideAnim  = useRef(new Animated.Value(30)).current;
   const btAnim     = useRef(new Animated.Value(1)).current;
-
-  const timerRef = useRef(null);
+  const timerRef   = useRef(null);
 
   useEffect(() => {
     Animated.parallel([
@@ -147,7 +124,6 @@ export default function App() {
         ])
       );
       loop.start();
-      
       timerRef.current = setInterval(() => {
         setSessionTime(t => t + 1);
         setBattery(b => Math.max(0, b - 0.01));
@@ -162,18 +138,6 @@ export default function App() {
       setSessionTime(0);
     }
   }, [isTherapyRunning]);
-
-  // 🛡️ ميزة الأمان الذكية: إيقاف تلقائي بعد 15 دقيقة (900 ثانية)
-  useEffect(() => {
-    if (sessionTime >= 900 && isTherapyRunning) {
-      setIsTherapyRunning(false);
-      showModal(
-        'حماية الأمان التلقائية ⏱️',
-        'تم إيقاف الجلسة تلقائياً بعد 15 دقيقة لحماية عضلاتك وبشرتك من الحرارة المستمرة.',
-        'warn'
-      );
-    }
-  }, [sessionTime, isTherapyRunning]);
 
   const formatTime = (sec) => {
     const m = Math.floor(sec / 60).toString().padStart(2, '0');
@@ -204,7 +168,7 @@ export default function App() {
     }
     if (!isTherapyRunning) {
       setIsTherapyRunning(true);
-      showModal('بدء الجلسة الذكية 🚀', `تم تفعيل نبضات TENS على المستوى ${tensLevel} والحرارة ${heatLevel}°C.\nمدة الجلسة القصوى: 15 دقيقة للأمان.`, 'success');
+      showModal('بدء الجلسة الذكية 🚀', `تم تفعيل نبضات TENS على المستوى ${tensLevel} والحرارة ${heatLevel}°C.`, 'success');
     } else {
       setIsTherapyRunning(false);
       showModal('انتهت الجلسة', `مدة الجلسة: ${formatTime(sessionTime)}. أحسنت!`, 'info');
@@ -264,14 +228,12 @@ export default function App() {
         <Text style={styles.welcomeHi}>مرحباً 👋</Text>
         <Text style={styles.welcomeSub}>جاهز لبناء عظام حديدية اليوم؟</Text>
       </View>
-
       <View style={[styles.statusBanner, isConnected ? styles.bannerConnected : styles.bannerDisconnected]}>
         <View style={[styles.statusDot, { backgroundColor: isConnected ? COLORS.green : COLORS.red }]} />
         <Text style={styles.statusBannerText}>
           {isConnected ? '🦷 متصل بـ Bone Core Pro' : 'الجهاز غير متصل'}
         </Text>
       </View>
-
       <View style={styles.card}>
         <Text style={styles.cardLabel}>مؤشر الاستقامة اليومي</Text>
         <View style={styles.circleRow}>
@@ -283,11 +245,9 @@ export default function App() {
           </View>
         </View>
       </View>
-
       <TouchableOpacity style={styles.quickBtn} onPress={() => switchTab('control')} activeOpacity={0.85}>
-        <Text style={styles.quickBtnText}>ابدأ جلسه علاجية جديدة ←</Text>
+        <Text style={styles.quickBtnText}>ابدأ جلسة علاجية جديدة ←</Text>
       </TouchableOpacity>
-
       <View style={styles.tipCard}>
         <Text style={styles.tipTitle}>💡 نصيحة اليوم</Text>
         <Text style={styles.tipText}>
@@ -300,7 +260,6 @@ export default function App() {
   const renderSessions = () => (
     <Animated.View style={[styles.tabContent, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
       <Text style={styles.sectionTitle}>الجلسات العلاجية</Text>
-
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
         {therapyModes.map((mode) => (
           <TouchableOpacity
@@ -314,81 +273,38 @@ export default function App() {
           </TouchableOpacity>
         ))}
       </ScrollView>
-
       <View style={styles.card}>
         <View style={styles.sliderBlock}>
           <View style={styles.sliderLabelRow}>
             <Text style={styles.sliderTitle}>⚡ نبضات TENS</Text>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>المستوى {tensLevel}</Text>
-            </View>
+            <View style={styles.badge}><Text style={styles.badgeText}>المستوى {tensLevel}</Text></View>
           </View>
           <Slider
-            style={styles.slider}
-            minimumValue={1}
-            maximumValue={10}
-            step={1}
-            value={tensLevel}
-            onValueChange={setTensLevel}
-            minimumTrackTintColor={COLORS.yellow}
-            maximumTrackTintColor={COLORS.border}
-            thumbTintColor={COLORS.yellow}
+            style={styles.slider} minimumValue={1} maximumValue={10} step={1} value={tensLevel} onValueChange={setTensLevel}
+            minimumTrackTintColor={COLORS.yellow} maximumTrackTintColor={COLORS.border} thumbTintColor={COLORS.yellow}
           />
-          <View style={styles.sliderRange}>
-            <Text style={styles.rangeText}>1 (خفيف)</Text>
-            <Text style={styles.rangeText}>10 (قوي)</Text>
-          </View>
         </View>
-
         <View style={styles.sliderBlock}>
           <View style={styles.sliderLabelRow}>
             <Text style={styles.sliderTitle}>🌡️ الحرارة العلاجية</Text>
-            <View style={[styles.badge, { backgroundColor: '#fee2e2' }]}>
-              <Text style={[styles.badgeText, { color: COLORS.danger }]}>{heatLevel}°C</Text>
-            </View>
+            <View style={[styles.badge, { backgroundColor: '#fee2e2' }]}><Text style={[styles.badgeText, { color: COLORS.danger }]}>{heatLevel}°C</Text></View>
           </View>
           <Slider
-            style={styles.slider}
-            minimumValue={30}
-            maximumValue={45}
-            step={1}
-            value={heatLevel}
-            onValueChange={setHeatLevel}
-            minimumTrackTintColor={COLORS.orange}
-            maximumTrackTintColor={COLORS.border}
-            thumbTintColor={COLORS.orange}
+            style={styles.slider} minimumValue={30} maximumValue={45} step={1} value={heatLevel} onValueChange={setHeatLevel}
+            minimumTrackTintColor={COLORS.orange} maximumTrackTintColor={COLORS.border} thumbTintColor={COLORS.orange}
           />
-          <View style={styles.sliderRange}>
-            <Text style={styles.rangeText}>30°C</Text>
-            <Text style={styles.rangeText}>45°C</Text>
-          </View>
         </View>
-
         {isTherapyRunning && (
           <View style={styles.timerRow}>
             <ActivityIndicator size="small" color={COLORS.navyLight} />
-            <Text style={styles.timerText}>جلسة نشطة: {formatTime(sessionTime)} (أقصى حد 15:00)</Text>
+            <Text style={styles.timerText}>جلسة نشطة: {formatTime(sessionTime)}</Text>
           </View>
         )}
-
         <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-          <TouchableOpacity
-            style={[styles.primaryBtn, isTherapyRunning && styles.dangerBtn]}
-            onPress={handleStartTherapy}
-            activeOpacity={0.88}
-          >
-            <Text style={styles.primaryBtnText}>
-              {isTherapyRunning ? '⏹ إيقاف الجلسة' : '▶ ابدأ الجلسة الذكية'}
-            </Text>
+          <TouchableOpacity style={[styles.primaryBtn, isTherapyRunning && styles.dangerBtn]} onPress={handleStartTherapy} activeOpacity={0.88}>
+            <Text style={styles.primaryBtnText}>{isTherapyRunning ? '⏹ إيقاف الجلسة' : '▶ ابدأ الجلسة الذكية'}</Text>
           </TouchableOpacity>
         </Animated.View>
-      </View>
-
-      <View style={styles.infoBox}>
-        <Text style={styles.infoTitle}>🦴 كيف تعمل تقنية TENS؟</Text>
-        <Text style={styles.infoText}>
-          تُرسل نبضات كهربائية منخفضة الطاقة عبر الجلد لتحفيز الأعصاب وتخفيف الألم وارتخاء العضلات دون أي آثار جانبية.
-        </Text>
       </View>
     </Animated.View>
   );
@@ -396,7 +312,6 @@ export default function App() {
   const renderHub = () => (
     <Animated.View style={[styles.tabContent, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
       <Text style={styles.sectionTitle}>المرجع الشامل للعظام 🦴</Text>
-
       {hubSections.map((sec, i) => (
         <View key={i} style={styles.card}>
           <View style={styles.hubHeader}>
@@ -411,36 +326,15 @@ export default function App() {
           ))}
         </View>
       ))}
-
-      <View style={styles.card}>
-        <Text style={styles.cardLabel}>🥩 دليل التغذية</Text>
-        <View style={styles.nutritionRow}>
-          <View style={[styles.nutritionCol, { borderColor: COLORS.green }]}>
-            <Text style={styles.nutritionHeader}>✅ أصدقاء العظام</Text>
-            {['🥚 بيض + فيتامين K2', '🥦 بروكلي وسبانخ', '🐟 سمك وأوميجا 3', '🌰 لوز وبذور سمسم'].map((item, i) => (
-              <Text key={i} style={styles.nutritionItem}>{item}</Text>
-            ))}
-          </View>
-          <View style={[styles.nutritionCol, { borderColor: COLORS.red }]}>
-            <Text style={[styles.nutritionHeader, { color: COLORS.red }]}>❌ لصوص الكالمسيوم</Text>
-            {['🥤 مشروبات غازية', '🍬 سكر أبيض', '🌭 لحوم مصنعة', '🍟 وجبات سريعة'].map((item, i) => (
-              <Text key={i} style={styles.nutritionItem}>{item}</Text>
-            ))}
-          </View>
-        </View>
-      </View>
     </Animated.View>
   );
 
   return (
     <SafeAreaView style={styles.root}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.navy} />
-
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <View style={styles.logoCircle}>
-            <Text style={styles.logoText}>🦴</Text>
-          </View>
+          <View style={styles.logoCircle}><Text style={styles.logoText}>🦴</Text></View>
           <View>
             <Text style={styles.appTitle}>The Bone Core</Text>
             <Text style={styles.appSlogan}>ذكاء اصطناعي · استقامة الجسد</Text>
@@ -452,13 +346,11 @@ export default function App() {
           </TouchableOpacity>
         </Animated.View>
       </View>
-
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {activeTab === 'home'    && renderHome()}
         {activeTab === 'control' && renderSessions()}
         {activeTab === 'hub'     && renderHub()}
       </ScrollView>
-
       <View style={styles.navBar}>
         {[
           { id: 'home',    label: 'الرئيسية', emoji: '🏠' },
@@ -468,22 +360,16 @@ export default function App() {
           <TouchableOpacity key={tab.id} style={styles.navItem} onPress={() => switchTab(tab.id)} activeOpacity={0.75}>
             <Text style={[styles.navEmoji, activeTab === tab.id && styles.navEmojiActive]}>{tab.emoji}</Text>
             <Text style={[styles.navLabel, activeTab === tab.id && styles.navLabelActive]}>{tab.label}</Text>
-            {activeTab === tab.id && <View style={styles.navIndicator} />}
           </TouchableOpacity>
         ))}
       </View>
-
       <Modal animationType="fade" transparent visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
-            <Text style={styles.modalEmoji}>
-              {modalData.type === 'success' ? '✅' : modalData.type === 'warn' ? '⚠️' : 'ℹ️'}
-            </Text>
+            <Text style={styles.modalEmoji}>{modalData.type === 'success' ? '✅' : 'ℹ️'}</Text>
             <Text style={styles.modalTitle}>{modalData.title}</Text>
             <Text style={styles.modalDesc}>{modalData.desc}</Text>
-            <TouchableOpacity style={styles.modalBtn} onPress={() => setModalVisible(false)}>
-              <Text style={styles.modalBtnText}>حسناً</Text>
-            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalBtn} onPress={() => setModalVisible(false)}><Text style={styles.modalBtnText}>حسناً</Text></TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -503,32 +389,64 @@ function StatItem({ icon, label, value, color }) {
   );
 }
 
-// ─── STYLES (تنسيقات كاملة ومغلقة بدون أي نقص) ──────────────────────────────────
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: COLORS.offWhite },
-  header: {
-    backgroundColor: COLORS.navy,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
+  header: { backgroundColor: COLORS.navy, paddingHorizontal: 20, paddingVertical: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomLeftRadius: 20, borderBottomRightRadius: 20 },
   headerLeft: { flexDirection: 'row', alignItems: 'center' },
-  logoCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', justifyContent: 'center', alignItems: 'center', marginRight: 10 },
+  logoCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.navyMid, alignItems: 'center', justifyContent: 'center', marginRight: 10 },
   logoText: { fontSize: 20 },
   appTitle: { color: COLORS.white, fontSize: 18, fontWeight: 'bold' },
-  appSlogan: { color: COLORS.cyanLight, fontSize: 11, marginTop: 2 },
-  btBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: COLORS.danger, justifyContent: 'center', alignItems: 'center' },
+  appSlogan: { color: COLORS.cyanLight, fontSize: 12 },
+  btBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.navyMid, alignItems: 'center', justifyContent: 'center' },
   btBtnConnected: { backgroundColor: COLORS.green },
-  btIcon: { fontSize: 18, color: COLORS.white },
-  scrollContent: { paddingBottom: 30 },
+  btIcon: { fontSize: 18 },
+  scrollContent: { paddingBottom: 100 },
   tabContent: { padding: 20 },
-  welcomeBlock: { marginBottom: 20, alignItems: 'flex-start' },
+  welcomeBlock: { marginBottom: 15 },
   welcomeHi: { fontSize: 24, fontWeight: 'bold', color: COLORS.textPrimary },
-  welcomeSub: { fontSize: 14, color: COLORS.textSecond, marginTop: 4 },
+  welcomeSub: { fontSize: 14, color: COLORS.textSecond },
   statusBanner: { flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 12, marginBottom: 20 },
   bannerConnected: { backgroundColor: '#e6f4ea' },
-  bannerD
+  bannerDisconnected: { backgroundColor: '#fce8e6' },
+  statusDot: { width: 8, height: 8, borderRadius: 4, marginRight: 8 },
+  statusBannerText: { fontSize: 14, fontWeight: '600', color: COLORS.textPrimary },
+  card: { backgroundColor: COLORS.cardBg, borderRadius: 16, padding: 16, marginBottom: 20 },
+  cardLabel: { fontSize: 16, fontWeight: 'bold', color: COLORS.textPrimary, marginBottom: 12 },
+  circleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' },
+  statsCol: { flex: 1, marginLeft: 20 },
+  progressPct: { fontSize: 28, fontWeight: 'bold', color: COLORS.navy },
+  progressLabel: { fontSize: 12, color: COLORS.textSecond },
+  quickBtn: { backgroundColor: COLORS.navyLight, padding: 16, borderRadius: 12, alignItems: 'center', marginBottom: 20 },
+  quickBtnText: { color: COLORS.white, fontSize: 16, fontWeight: 'bold' },
+  tipCard: { backgroundColor: '#fff7ed', borderWidth: 1, borderColor: '#ffedd5', borderRadius: 12, padding: 16 },
+  tipTitle: { fontSize: 16, fontWeight: 'bold', color: COLORS.orange, marginBottom: 6 },
+  tipText: { fontSize: 14, color: '#7c2d12', lineHeight: 20 },
+  sectionTitle: { fontSize: 20, fontWeight: 'bold', color: COLORS.textPrimary, marginBottom: 16 },
+  modeChip: { backgroundColor: COLORS.white, padding: 12, borderRadius: 12, marginRight: 10, width: 140, borderWidth: 1, borderColor: COLORS.border },
+  modeChipActive: { backgroundColor: COLORS.navyMid, borderColor: COLORS.navyMid },
+  modeEmoji: { fontSize: 24, marginBottom: 4 },
+  modeChipText: { fontSize: 14, fontWeight: 'bold', color: COLORS.textPrimary },
+  modeDesc: { fontSize: 11, color: COLORS.textSecond, marginTop: 2 },
+  sliderBlock: { marginBottom: 20 },
+  sliderLabelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  sliderTitle: { fontSize: 15, fontWeight: '600', color: COLORS.textPrimary },
+  badge: { backgroundColor: '#fef9c3', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+  badgeText: { fontSize: 12, fontWeight: 'bold', color: COLORS.yellow },
+  slider: { width: '100%', height: 40 },
+  primaryBtn: { backgroundColor: COLORS.green, padding: 16, borderRadius: 12, alignItems: 'center' },
+  dangerBtn: { backgroundColor: COLORS.danger },
+  primaryBtnText: { color: COLORS.white, fontSize: 16, fontWeight: 'bold' },
+  hubHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  hubEmoji: { fontSize: 22, marginRight: 8 },
+  hubTitle: { fontSize: 16, fontWeight: 'bold', color: COLORS.navy },
+  hubItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  hubDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: COLORS.cyan, marginRight: 8 },
+  hubItemText: { fontSize: 14, color: COLORS.textPrimary, flex: 1 },
+  navBar: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, backgroundColor: COLORS.navBg, flexDirection: 'row', borderTopWidth: 1, borderTopColor: COLORS.border, justifyContent: 'space-around', alignItems: 'center' },
+  navItem: { alignItems: 'center', justifyContent: 'center' },
+  navEmoji: { fontSize: 20 },
+  navEmojiActive: { color: COLORS.navyLight },
+  navLabel: { fontSize: 12, color: COLORS.textSecond },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
+  modalBox: { width: width * 0.8, backgroundColor: COLORS.white, borderRadius: 20, padding: 24, alignItems: 'center' },
+  modalEmoji: { fontSize: 40,
