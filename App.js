@@ -1,43 +1,40 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  ScrollView,
-  SafeAreaView,
-  StatusBar,
-  Dimensions,
-  Animated,
-  Easing,
-  ActivityIndicator,
-  Modal,
-  TextInput,
+  StyleSheet, Text, View, TouchableOpacity, ScrollView,
+  SafeAreaView, StatusBar, Dimensions, Animated, Easing,
+  Modal, TextInput, Platform,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 
 const { width } = Dimensions.get('window');
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-const COLORS = {
-  navy:        '#060c1f', 
-  navyMid:     '#0f1e40', 
-  navyLight:   '#3b82f6', 
-  cyan:        '#06b6d4', 
-  cyanLight:   '#083344',
+const C = {
+  bg:          '#060c1f',
+  surface:     '#0f1e40',
+  navyLight:   '#3b82f6',
+  cyan:        '#06b6d4',
   white:       '#ffffff',
-  offWhite:    '#f8fafc', 
+  offWhite:    '#f8fafc',
   textPrimary: '#0f172a',
   textSecond:  '#64748b',
-  green:       '#10b981', 
-  red:         '#ef4444', 
-  orange:      '#f97316', 
-  purple:      '#8b5cf6', 
-  amber:       '#f59e0b', 
+  green:       '#10b981',
+  red:         '#ef4444',
+  orange:      '#f97316',
+  purple:      '#8b5cf6',
+  amber:       '#f59e0b',
   border:      '#e2e8f0',
 };
 
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+// كود قراءة الحساسات مدمج محلياً لسهولة البناء لـ APK
+const generateLiveSensorData = () => {
+  return {
+    cervicalAngle: Math.floor(Math.random() * (18 - 8 + 1)) + 8,
+    lumbarPressure: Math.floor(Math.random() * (450 - 380 + 1)) + 380,
+    emgMuscleStrain: Math.floor(Math.random() * (22 - 10 + 1)) + 10,
+  };
+};
 
 function CircularProgress({ value = 91, size = 160 }) {
   const animVal = useRef(new Animated.Value(0)).current;
@@ -49,8 +46,8 @@ function CircularProgress({ value = 91, size = 160 }) {
   useEffect(() => {
     Animated.timing(animVal, {
       toValue: value,
-      duration: 2200,
-      easing: Easing.out(Easing.back(1)),
+      duration: 1500,
+      easing: Easing.out(Easing.quad),
       useNativeDriver: false,
     }).start();
   }, [value]);
@@ -65,17 +62,16 @@ function CircularProgress({ value = 91, size = 160 }) {
       <Svg width={size} height={size}>
         <Defs>
           <LinearGradient id="premiumGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <Stop offset="0%" stopColor={COLORS.cyan} />
-            <Stop offset="50%" stopColor={COLORS.navyLight} />
-            <Stop offset="100%" stopColor={COLORS.purple} />
+            <Stop offset="0%" stopColor={C.cyan} />
+            <Stop offset="100%" stopColor={C.purple} />
           </LinearGradient>
         </Defs>
-        <Circle cx={cx} cy={cy} r={radius} fill="transparent" stroke="#f1f5f9" strokeWidth={12} />
+        <Circle cx={cx} cy={cy} r={radius} fill="transparent" stroke="#1e293b" strokeWidth={10} />
         <AnimatedCircle
           cx={cx} cy={cy} r={radius}
           fill="transparent"
           stroke="url(#premiumGrad)"
-          strokeWidth={12}
+          strokeWidth={10}
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
@@ -83,8 +79,8 @@ function CircularProgress({ value = 91, size = 160 }) {
         />
       </Svg>
       <View style={[StyleSheet.absoluteFillObject, { alignItems: 'center', justifyContent: 'center' }]}>
-        <Text style={styles.progressPct}>{value}%</Text>
-        <Text style={styles.progressLabel}>تطابق المحور</Text>
+        <Text style={{color: C.white, fontSize: 28, fontWeight: 'bold'}}>{value}%</Text>
+        <Text style={{color: C.textSecond, fontSize: 10, marginTop: 2}}>تطابق المحور</Text>
       </View>
     </View>
   );
@@ -94,24 +90,16 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [isConnected, setIsConnected] = useState(false);
   
-  // الحساسات والتقييم الذكي
   const [cervicalAngle, setCervicalAngle] = useState(11);
   const [lumbarPressure, setLumbarPressure] = useState(410);
   const [emgStrain, setEmgStrain] = useState(14);
-  const [spineScore, setSpineScore] = useState(100); // التلعيب ونقاط العمود الفقري
-  const [headLoad, setHeadLoad] = useState(5.4); // حاسبة الحمل الميكانيكي
+  const [spineScore, setSpineScore] = useState(100);
+  const [headLoad, setHeadLoad] = useState(5.4);
 
-  // إعدادات العلاج
   const [tensLevel, setTensLevel] = useState(5);
-  const [frequency, setFrequency] = useState(85); 
-  const [heatLevel, setHeatLevel] = useState(39); 
-  
-  // حالة الجلسة
+  const [heatLevel, setHeatLevel] = useState(38);
   const [isTherapyRunning, setIsTherapyRunning] = useState(false);
-  const [sessionTime, setSessionTime] = useState(0);
-  const [sessionDuration, setSessionDuration] = useState(20); 
   
-  // لوحة الطبيب المشرف
   const [isDoctorUnlocked, setIsDoctorUnlocked] = useState(false);
   const [doctorPin, setDoctorPin] = useState('');
   const [maxTensAllowed, setMaxTensAllowed] = useState(12);
@@ -119,251 +107,178 @@ export default function App() {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalData, setModalData] = useState({ title: '', desc: '', type: 'success' });
 
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(35)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const fadeAnim = useRef(new Animated.Value(1)).current;
   const badPostureTimer = useRef(0);
-  const timerRef = useRef(null);
 
   useEffect(() => {
-    fadeAnim.setValue(0);
-    slideAnim.setValue(25);
-    Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 450, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: 0, duration: 450, easing: Easing.out(Easing.quad), useNativeDriver: true })
-    ]).start();
-  }, [activeTab]);
-
-  useEffect(() => {
+    let timer = null;
     if (isTherapyRunning && isConnected) {
-      const loop = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, { toValue: 1.03, duration: 700, useNativeDriver: true }),
-          Animated.timing(pulseAnim, { toValue: 1,    duration: 700, useNativeDriver: true }),
-        ])
-      );
-      loop.start();
+      timer = setInterval(() => {
+        const data = generateLiveSensorData();
+        setCervicalAngle(data.cervicalAngle);
+        setLumbarPressure(data.lumbarPressure);
+        setEmgStrain(data.emgMuscleStrain);
 
-      timerRef.current = setInterval(() => {
-        setSessionTime(t => t + 1);
-
-        // محاكاة حية للحساسات
-        const newAngle = Math.floor(Math.random() * (18 - 8 + 1)) + 8;
-        setCervicalAngle(newAngle);
-        setLumbarPressure(Math.floor(Math.random() * (440 - 390 + 1)) + 390);
-        setEmgStrain(Math.floor(Math.random() * (22 - 11 + 1)) + 11);
-
-        // 1. حاسبة الحمل الميكانيكي (كلما زاد الميل، زاد الوزن الافتراضي للرأس)
-        let currentLoad = 5.4; // الوزن الطبيعي
-        if (newAngle >= 15) currentLoad = 12.2;
-        if (newAngle >= 18) currentLoad = 18.5;
+        let currentLoad = 5.4;
+        if (data.cervicalAngle >= 14) currentLoad = 12.2;
+        if (data.cervicalAngle >= 17) currentLoad = 18.5;
         setHeadLoad(currentLoad);
 
-        // 2. نظام التنبيهات الحركية الصامتة والتلعيب (Spine Score)
-        if (newAngle >= 15) {
+        if (data.cervicalAngle >= 15) {
           badPostureTimer.current += 1;
-          setSpineScore(s => Math.max(0, s - 1)); // خصم نقاط
-          if (badPostureTimer.current === 5) {
-            showModal('⚠️ تنبيه حركي ذكي', `تم رصد انحناء حاد في العنق (وزن الرأس الفعلي على فقراتك الآن ${currentLoad} كجم!). يرجى استعادة الاستقامة فوراً.`, 'warn');
+          setSpineScore(s => Math.max(0, s - 1));
+          if (badPostureTimer.current === 4) {
+            showModal('⚠️ تنبيه الاستقامة', `تم رصد ميل حاد! وزن الرأس على فقراتك الآن يعادل ${currentLoad} كجم.`, 'warn');
           }
         } else {
           badPostureTimer.current = 0;
-          setSpineScore(s => Math.min(100, s + 1)); // زيادة نقاط للمكافأة
+          setSpineScore(s => Math.min(100, s + 1));
         }
-
-      }, 1000);
-
-      return () => {
-        loop.stop();
-        clearInterval(timerRef.current);
-      };
-    } else {
-      pulseAnim.setValue(1);
-      clearInterval(timerRef.current);
+      }, 1200);
     }
+    return () => clearInterval(timer);
   }, [isTherapyRunning, isConnected]);
-
-  const toggleBluetooth = () => {
-    if (!isConnected) {
-      setIsConnected(true);
-      showModal('📡 تم الاقتران السريري', 'تم تفعيل الاتصال بوحدة المستشعرات. ระบบ التتبع الحركي جاهز الآن.', 'success');
-    } else {
-      setIsConnected(false);
-      setIsTherapyRunning(false);
-      setCervicalAngle(11); setHeadLoad(5.4);
-    }
-  };
 
   const showModal = (title, desc, type) => {
     setModalData({ title, desc, type });
     setModalVisible(true);
   };
 
-  const handleDoctorLogin = () => {
-    if (doctorPin === '1234') {
-      setIsDoctorUnlocked(true);
-      setDoctorPin('');
-    } else {
-      showModal('❌ وصول مرفوض', 'الرمز السري للطبيب غير صحيح.', 'warn');
-    }
-  };
-
-  // --- 1. الشاشة الرئيسية (المرصد والتلعيب) ---
-  const renderHome = () => (
-    <Animated.View style={[styles.tabContent, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-      <View style={styles.scoreBoard}>
-        <View style={{flexDirection: 'row-reverse', alignItems: 'center'}}>
-          <Text style={{fontSize: 32, marginLeft: 10}}>🏆</Text>
-          <View>
-            <Text style={styles.scoreLabel}>نقاط الاستقامة اليومية</Text>
-            <Text style={[styles.scoreValue, { color: spineScore > 80 ? COLORS.green : COLORS.amber }]}>{spineScore} / 100</Text>
-          </View>
-        </View>
-        <Text style={styles.scoreRank}>{spineScore > 80 ? 'بطل حركي 🥇' : 'يحتاج انتباه ⚠️'}</Text>
-      </View>
-
-      <View style={styles.liveGrid}>
-        <View style={styles.miniReadout}>
-          <Text style={styles.readoutIcon}>📐</Text>
-          <Text style={styles.readoutLabel}>ميل العنق</Text>
-          <Text style={[styles.readoutValue, { color: cervicalAngle >= 15 ? COLORS.red : COLORS.green }]}>{cervicalAngle}°</Text>
-        </View>
-        <View style={styles.miniReadout}>
-          <Text style={styles.readoutIcon}>🏋️</Text>
-          <Text style={styles.readoutLabel}>حِمل الرأس الفعلي</Text>
-          <Text style={[styles.readoutValue, { color: headLoad > 6 ? COLORS.amber : COLORS.navyLight }]}>{headLoad} كجم</Text>
-        </View>
-      </View>
-
-      <View style={styles.card}>
-         <Text style={styles.cardLabel}>🎯 الحالة الميكانيكية اللحظية</Text>
-         <View style={styles.circleRow}>
-           <CircularProgress value={isConnected ? (100 - cervicalAngle*2) : 91} size={145} />
-           <View style={styles.statsCol}>
-             <StatItem icon="🔋" label="بطارية الجهاز" value="98%" color={COLORS.green} />
-             <StatItem icon="🧠" label="إجهاد عضلي" value={`${emgStrain}%`} color={emgStrain > 18 ? COLORS.red : COLORS.green} />
-             <StatItem icon="⚖️" label="الضغط القطني" value={`${lumbarPressure} N`} color={COLORS.orange} />
-           </View>
-         </View>
-      </View>
-    </Animated.View>
-  );
-
-  // --- 2. غرفة العلاج (التحكم) ---
-  const renderControl = () => (
-    <Animated.View style={[styles.tabContent, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-      <Text style={styles.sectionTitle}>التحفيز الكهربائي والحراري ⚡</Text>
-      <View style={styles.card}>
-        <Text style={styles.sliderTitle}>⚡ شدة النبضة (TENS) - أقصى حد مسموح: {maxTensAllowed}</Text>
-        <Slider style={styles.slider} minimumValue={1} maximumValue={maxTensAllowed} step={1} value={tensLevel} onValueChange={setTensLevel} minimumTrackTintColor={COLORS.cyan} />
-        <Text style={styles.badgeText}>المستوى: {tensLevel}</Text>
-
-        <Text style={[styles.sliderTitle, {marginTop: 20}]}>🌡️ المعالجة الحرارية</Text>
-        <Slider style={styles.slider} minimumValue={32} maximumValue={45} step={1} value={heatLevel} onValueChange={setHeatLevel} minimumTrackTintColor={COLORS.orange} />
-        <Text style={[styles.badgeText, {color: COLORS.orange}]}>الحرارة: {heatLevel}°C</Text>
-
-        <TouchableOpacity style={[styles.primaryBtn, isTherapyRunning && {backgroundColor: COLORS.red}]} onPress={() => {
-            if(!isConnected) return showModal('تنبيه', 'يجب تفعيل البلوتوث أولاً', 'warn');
-            setIsTherapyRunning(!isTherapyRunning);
-        }}>
-          <Text style={styles.primaryBtnText}>{isTherapyRunning ? '⏹ إيقاف الجلسة' : '▶ تشغيل البروتوكول'}</Text>
-        </TouchableOpacity>
-      </View>
-    </Animated.View>
-  );
-
-  // --- 3. النظام الغذائي والتدريبي (جديد) ---
-  const renderHealth = () => (
-    <Animated.View style={[styles.tabContent, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-      <Text style={styles.sectionTitle}>النظام الغذائي والرياضي للعظام 🥗💪</Text>
-      
-      <View style={styles.card}>
-        <Text style={[styles.subSectionTitle, {color: COLORS.green}]}>🥗 التغذية العظمية الدقيقة (Nutrition)</Text>
-        <Text style={styles.textBullet}>• <Text style={{fontWeight: 'bold'}}>الإفطار:</Text> بيض مسلوق (غني بالبروتين و D3) + سبانخ (مصدر للكالسيوم النباتي K1).</Text>
-        <Text style={styles.textBullet}>• <Text style={{fontWeight: 'bold'}}>الغداء:</Text> سمك السلمون أو السردين (أوميجا 3 كمضاد للالتهاب الغضروفي) + بروكلي.</Text>
-        <Text style={styles.textBullet}>• <Text style={{fontWeight: 'bold'}}>العشاء:</Text> زبادي يوناني مع بذور الشيا والكتان (لتأمين الكولاجين والمغنيسيوم للتعافي الليلي).</Text>
-        <Text style={styles.textBullet}>• <Text style={{fontWeight: 'bold'}}>المكملات الضرورية:</Text> فيتامين D3 مع K2 (لتوجيه الكالسيوم للعظام ومنع ترسبه في الشرايين).</Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={[styles.subSectionTitle, {color: COLORS.cyan}]}>🏋️ البرنامج الحركي والتدريبي (Rehab)</Text>
-        <Text style={styles.textBullet}>1. <Text style={{fontWeight: 'bold'}}>تمرين (Chin Tucks) للرقبة:</Text> إرجاع الذقن للخلف لتقوية العضلات العميقة وتقليل الحمل على C4-C5 (10 تكرارات 3 مرات يومياً).</Text>
-        <Text style={styles.textBullet}>2. <Text style={{fontWeight: 'bold'}}>امتداد ماكنزي (McKenzie Extension):</Text> النوم على البطن والارتفاع بالجذع لدفع الفتق الغضروفي القطني للداخل وتقليل ألم عرق النسا.</Text>
-        <Text style={styles.textBullet}>3. <Text style={{fontWeight: 'bold'}}>تمرين (Bird-Dog):</Text> لتقوية العضلات الموازية للعمود الفقري (Core) بدون تشكيل ضغط انضغاطي على الأقراص.</Text>
-      </View>
-    </Animated.View>
-  );
-
-  // --- 4. لوحة الطبيب المشرف (جديد) ---
-  const renderDoctor = () => (
-    <Animated.View style={[styles.tabContent, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-      <Text style={styles.sectionTitle}>بوابة الطبيب المشرف 👨‍⚕️</Text>
-      {!isDoctorUnlocked ? (
-        <View style={styles.card}>
-          <Text style={styles.cardLabel}>الرجاء إدخال رمز الوصول الطبي (PIN: 1234)</Text>
-          <TextInput 
-            style={styles.input} secureTextEntry keyboardType="numeric" 
-            value={doctorPin} onChangeText={setDoctorPin} placeholder="****" 
-          />
-          <TouchableOpacity style={styles.primaryBtn} onPress={handleDoctorLogin}>
-            <Text style={styles.primaryBtnText}>تسجيل الدخول الآمن</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <View style={styles.card}>
-          <Text style={[styles.subSectionTitle, {color: COLORS.purple}]}>ملف المريض السريري</Text>
-          <StatItem icon="👤" label="اسم المريض" value="سيف الدين" color={COLORS.textPrimary} />
-          <StatItem icon="⏱️" label="إجمالي ساعات الاستخدام" value="14 ساعة و 20 دقيقة" color={COLORS.textPrimary} />
-          <StatItem icon="📉" label="متوسط الاستقامة الأسبوعي" value="88% (تحسن ملحوظ)" color={COLORS.green} />
-          
-          <View style={{height: 1, backgroundColor: COLORS.border, marginVertical: 15}} />
-          
-          <Text style={styles.subSectionTitle}>قفل حدود الترددات (روشتة رقمية)</Text>
-          <Text style={styles.sliderTitle}>الحد الأقصى لشدة TENS المسموحة للمريض: {maxTensAllowed}</Text>
-          <Slider style={styles.slider} minimumValue={5} maximumValue={12} step={1} value={maxTensAllowed} onValueChange={setMaxTensAllowed} minimumTrackTintColor={COLORS.purple} />
-          
-          <TouchableOpacity style={[styles.primaryBtn, {backgroundColor: COLORS.navy}]} onPress={() => setIsDoctorUnlocked(false)}>
-            <Text style={styles.primaryBtnText}>حفظ وتسجيل الخروج</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </Animated.View>
-  );
-
   return (
     <SafeAreaView style={styles.root}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.navy} />
+      <StatusBar barStyle="light-content" backgroundColor={C.bg} />
       
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <View style={styles.logoCircle}><Text style={styles.logoText}>🦴</Text></View>
-          <View style={{ alignItems: 'flex-start' }}>
+          <Text style={{fontSize: 22}}>🦴</Text>
+          <View style={{marginRight: 8, alignItems: 'flex-end'}}>
             <Text style={styles.appTitle}>The Bone Core Pro</Text>
-            <Text style={styles.appSlogan}>التحكم الحركي، التغذية، والنبضات السريرية</Text>
+            <Text style={{color: C.cyan, fontSize: 10}}>المنظومة الطبية الذكية الشاملة</Text>
           </View>
         </View>
-        <TouchableOpacity style={[styles.btBtn, isConnected && {backgroundColor: COLORS.green}]} onPress={toggleBluetooth}>
-          <Text style={styles.btIcon}>{isConnected ? '📶 متصل' : '📵 اقتران'}</Text>
+        <TouchableOpacity style={[styles.btBtn, isConnected && {backgroundColor: C.green}]} onPress={() => {
+          setIsConnected(!isConnected);
+          if(!isConnected) showModal('📡 تم الاقتران', 'تم الاتصال بوحدة المستشعرات بنجاح.', 'success');
+        }}>
+          <Text style={{color: C.white, fontSize: 12, fontWeight: 'bold'}}>{isConnected ? '📶 متصل' : '📵 اقتران'}</Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {activeTab === 'home'    && renderHome()}
-        {activeTab === 'control' && renderControl()}
-        {activeTab === 'health'  && renderHealth()}
-        {activeTab === 'doctor'  && renderDoctor()}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {activeTab === 'home' && (
+          <Animated.View style={{opacity: fadeAnim}}>
+            <View style={styles.scoreBoard}>
+              <Text style={{fontSize: 28}}>🏆</Text>
+              <View style={{alignItems: 'flex-end'}}>
+                <Text style={{color: C.textSecond, fontSize: 12}}>مؤشر صحة العمود الفقري</Text>
+                <Text style={[styles.scoreValue, {color: spineScore > 80 ? C.green : C.amber}]}>{spineScore} / 100</Text>
+              </View>
+            </View>
+
+            <View style={styles.grid}>
+              <View style={styles.miniCard}>
+                <Text style={{fontSize: 24}}>📐</Text>
+                <Text style={styles.miniLabel}>زاوية العنق</Text>
+                <Text style={[styles.miniValue, {color: cervicalAngle >= 15 ? C.red : C.green}]}>{cervicalAngle}°</Text>
+              </View>
+              <View style={styles.miniCard}>
+                <Text style={{fontSize: 24}}>🏋️</Text>
+                <Text style={styles.miniLabel}>الحمل الميكانيكي</Text>
+                <Text style={styles.miniValue}>{headLoad} كجم</Text>
+              </View>
+            </View>
+
+            <View style={styles.mainCard}>
+              <Text style={styles.cardTitle}>🎯 المرصد الرقمي الحي</Text>
+              <View style={styles.row}>
+                <CircularProgress value={isConnected ? (100 - cervicalAngle * 2) : 92} size={130} />
+                <View style={{alignItems: 'flex-end', flex: 1, marginRight: 16}}>
+                  <Text style={styles.statText}>🧠 إجهاد العضلات: {emgStrain}%</Text>
+                  <Text style={styles.statText}>⚖️ الضغط القطني: {lumbarPressure} N</Text>
+                  <Text style={styles.statText}>🔋 مستوى البطارية: 97%</Text>
+                </View>
+              </View>
+            </View>
+          </Animated.View>
+        )}
+
+        {activeTab === 'control' && (
+          <View>
+            <Text style={styles.sectionTitle}>غرفة العلاج السريري ⚡</Text>
+            <View style={styles.mainCard}>
+              <Text style={styles.sliderLabel}>⚡ شدة تيار TENS (الأقصى: {maxTensAllowed})</Text>
+              <Slider style={{width: '100%', height: 40}} minimumValue={1} maximumValue={maxTensAllowed} step={1} value={tensLevel} onValueChange={setTensLevel} minimumTrackTintColor={C.cyan} />
+              <Text style={{color: C.cyan, textAlign: 'right', fontWeight: 'bold'}}>المستوى الحالي: {tensLevel}</Text>
+
+              <Text style={[styles.sliderLabel, {marginTop: 20}]}>🌡️ العلاج الحراري المستهدف</Text>
+              <Slider style={{width: '100%', height: 40}} minimumValue={30} maximumValue={45} step={1} value={heatLevel} onValueChange={setHeatLevel} minimumTrackTintColor={C.orange} />
+              <Text style={{color: C.orange, textAlign: 'right', fontWeight: 'bold'}}>درجة الحرارة: {heatLevel}°C</Text>
+
+              <TouchableOpacity style={[styles.actionBtn, isTherapyRunning && {backgroundColor: C.red}]} onPress={() => {
+                if(!isConnected) return showModal('تنبيه', 'برجاء الاقتران بالنظام أولاً', 'warn');
+                setIsTherapyRunning(!isTherapyRunning);
+              }}>
+                <Text style={styles.btnText}>{isTherapyRunning ? '⏹ إنهاء الجلسة العلاجية' : '▶ بدء تشغيل النبضات'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {activeTab === 'health' && (
+          <View>
+            <Text style={styles.sectionTitle}>خطة التعافي والصحة الجسدية 🥗</Text>
+            <View style={styles.mainCard}>
+              <Text style={{color: C.green, fontWeight: 'bold', marginBottom: 6, textAlign: 'right'}}>🥗 النظام الغذائي الداعم للعظام</Text>
+              <Text style={styles.bullet}>• التركيز على مكملات مركب الكالسيوم مع فيتامين D3 و K2 لضمان الترسيب داخل العظام.</Text>
+              <Text style={styles.bullet}>• وجبات غنية بالأوميجا 3 (كالسمك الزيتي) لتقليل التهابات المفاصل والغضاريف.</Text>
+            </View>
+            <View style={styles.mainCard}>
+              <Text style={{color: C.cyan, fontWeight: 'bold', marginBottom: 6, textAlign: 'right'}}>🏋️ البرنامج الرياضي والتأهيلي</Text>
+              <Text style={styles.bullet}>• تمارين Chin Tucks: لتقوية عضلات الرقبة العميقة وتعديل محور الرأس.</Text>
+              <Text style={styles.bullet}>• تمارين مكنزي القطنية: لدفع النواة اللبية للغضاريف المنزلقة إلى مكانها الطبيعي.</Text>
+            </View>
+          </View>
+        )}
+
+        {activeTab === 'doctor' && (
+          <View>
+            <Text style={styles.sectionTitle}>بوابة الطبيب المعالج 👨‍⚕️</Text>
+            {!isDoctorUnlocked ? (
+              <View style={styles.mainCard}>
+                <Text style={{color: C.white, marginBottom: 10, textAlign: 'right'}}>أدخل رمز الدخول الطبي (الرمز الافتراضي: 1234)</Text>
+                <TextInput style={styles.input} secureTextEntry keyboardType="numeric" value={doctorPin} onChangeText={setDoctorPin} placeholder="****" placeholderTextColor="#475569" />
+                <TouchableOpacity style={styles.actionBtn} onPress={() => {
+                  if(doctorPin === '1234') { setIsDoctorUnlocked(true); setDoctorPin(''); }
+                  else { showModal('خطأ', 'الرمز السري الطبي غير صحيح.', 'warn'); }
+                }}>
+                  <Text style={styles.btnText}>الولوج الآمن</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.mainCard}>
+                <Text style={{color: C.purple, fontWeight: 'bold', textAlign: 'right', marginBottom: 10}}>⚙️ الصلاحيات الطبية المقفلة</Text>
+                <Text style={{color: C.white, textAlign: 'right', fontSize: 12, marginBottom: 10}}>تحديد سقف تيار الـ TENS لحماية أعصاب المريض الأندرويد:</Text>
+                <Slider style={{width: '100%', height: 40}} minimumValue={5} maximumValue={15} step={1} value={maxTensAllowed} onValueChange={setMaxTensAllowed} minimumTrackTintColor={C.purple} />
+                <Text style={{color: C.purple, textAlign: 'right', fontWeight: 'bold', marginBottom: 15}}>الحد الأقصى الحالي: {maxTensAllowed}</Text>
+                <TouchableOpacity style={[styles.actionBtn, {backgroundColor: C.bg}]} onPress={() => setIsDoctorUnlocked(false)}>
+                  <Text style={styles.btnText}>خروج وحفظ التغييرات</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        )}
       </ScrollView>
 
       <View style={styles.navBar}>
         {[
-          { id: 'home',    label: 'المرصد', emoji: '🏠' },
-          { id: 'control', label: 'العلاج', emoji: '⚡' },
-          { id: 'health',  label: 'خطة التعافي', emoji: '🥗' },
-          { id: 'doctor',  label: 'الطبيب', emoji: '👨‍⚕️' },
-        ].map((tab) => (
-          <TouchableOpacity key={tab.id} style={styles.navItem} onPress={() => setActiveTab(tab.id)}>
-            <Text style={[styles.navEmoji, activeTab === tab.id && styles.navEmojiActive]}>{tab.emoji}</Text>
-            <Text style={[styles.navLabel, activeTab === tab.id && styles.navLabelActive]}>{tab.label}</Text>
+          { id: 'home', label: 'المرصد', icon: '🏠' },
+          { id: 'control', label: 'العلاج', icon: '⚡' },
+          { id: 'health', label: 'التعافي', icon: '🥗' },
+          { id: 'doctor', label: 'الطبيب', icon: '👨‍⚕️' },
+        ].map(t => (
+          <TouchableOpacity key={t.id} style={styles.navItem} onPress={() => setActiveTab(t.id)}>
+            <Text style={[styles.navIcon, activeTab === t.id && {color: C.cyan}]}>{t.icon}</Text>
+            <Text style={[styles.navLabel, activeTab === t.id && {color: C.cyan, fontWeight: 'bold'}]}>{t.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -371,11 +286,11 @@ export default function App() {
       <Modal animationType="fade" transparent visible={modalVisible}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
-            <Text style={styles.modalEmoji}>{modalData.type === 'warn' ? '⚠️' : '🚀'}</Text>
-            <Text style={styles.modalTitle}>{modalData.title}</Text>
-            <Text style={styles.modalDesc}>{modalData.desc}</Text>
-            <TouchableOpacity style={styles.modalBtn} onPress={() => setModalVisible(false)}>
-              <Text style={styles.modalBtnText}>تأكيد</Text>
+            <Text style={{fontSize: 36, marginBottom: 8}}>{modalData.type === 'warn' ? '⚠️' : '✅'}</Text>
+            <Text style={{color: C.textPrimary, fontSize: 18, fontWeight: 'bold', marginBottom: 8}}>{modalData.title}</Text>
+            <Text style={{color: C.textSecond, fontSize: 13, textAlign: 'center', marginBottom: 16}}>{modalData.desc}</Text>
+            <TouchableOpacity style={{backgroundColor: C.bg, padding: 12, width: '100%', borderRadius: 8, alignItems: 'center'}} onPress={() => setModalVisible(false)}>
+              <Text style={{color: C.white, fontWeight: 'bold'}}>فهمت</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -384,42 +299,33 @@ export default function App() {
   );
 }
 
-function StatItem({ icon, label, value, color }) {
-  return (
-    <View style={styles.statItem}>
-      <Text style={styles.statIcon}>{icon}</Text>
-      <View style={{ alignItems: 'flex-start' }}>
-        <Text style={styles.statLabel}>{label}</Text>
-        {value && <Text style={[styles.statValue, { color }]}>{value}</Text>}
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: COLORS.offWhite },
-  header: { backgroundColor: COLORS.navy, paddingHorizontal: 16, paddingVertical: 14, flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
+  root: { flex: 1, backgroundColor: '#060c1f' },
+  header: { padding: 16, backgroundColor: '#0f1e40', flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', borderBottomLeftRadius: 16, borderBottomRightRadius: 16 },
   headerLeft: { flexDirection: 'row-reverse', alignItems: 'center' },
-  logoCircle: { width: 42, height: 42, borderRadius: 21, backgroundColor: COLORS.navyMid, alignItems: 'center', justifyContent: 'center', marginLeft: 10 },
-  logoText: { fontSize: 20 },
-  appTitle: { color: COLORS.white, fontSize: 16, fontWeight: 'bold' },
-  appSlogan: { color: COLORS.cyan, fontSize: 10, marginTop: 1, textAlign: 'right' },
-  btBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, backgroundColor: COLORS.navyMid },
-  btIcon: { fontSize: 12, color: COLORS.white, fontWeight: 'bold' },
-  scrollContent: { paddingBottom: 110, padding: 16 },
-  sectionTitle: { fontSize: 20, fontWeight: 'bold', color: COLORS.navy, marginBottom: 16, textAlign: 'right' },
-  subSectionTitle: { fontSize: 15, fontWeight: 'bold', color: COLORS.navy, marginBottom: 10, textAlign: 'right' },
-  card: { backgroundColor: COLORS.white, borderRadius: 20, padding: 16, marginBottom: 16, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 },
-  cardLabel: { fontSize: 13, fontWeight: 'bold', color: COLORS.navy, marginBottom: 14, textAlign: 'right' },
-  scoreBoard: { backgroundColor: COLORS.white, borderRadius: 20, padding: 20, marginBottom: 16, flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', borderWidth: 2, borderColor: COLORS.navyLight },
-  scoreLabel: { fontSize: 12, color: COLORS.textSecond, textAlign: 'right' },
-  scoreValue: { fontSize: 22, fontWeight: 'bold', textAlign: 'right', marginTop: 4 },
-  scoreRank: { fontSize: 14, fontWeight: 'bold', color: COLORS.purple, backgroundColor: '#f3e8ff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
-  liveGrid: { flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 16 },
-  miniReadout: { width: '48%', backgroundColor: COLORS.white, borderRadius: 16, padding: 16, alignItems: 'center', borderWidth: 1, borderColor: COLORS.border },
-  readoutIcon: { fontSize: 28, marginBottom: 8 },
-  readoutLabel: { fontSize: 12, color: COLORS.textSecond, marginBottom: 4 },
-  readoutValue: { fontSize: 18, fontWeight: 'bold' },
-  circleRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
-  statsCol: { flex: 1, marginRight: 20, alignItems: 'flex-end' },
-  progressPct: { fontSize: 32, fontWeight:
+  appTitle: { color: C.white, fontSize: 16, fontWeight: 'bold' },
+  btBtn: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8, backgroundColor: '#1e293b' },
+  scrollContent: { padding: 16, paddingBottom: 100 },
+  scoreBoard: { backgroundColor: '#0f1e40', padding: 16, borderRadius: 12, flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, borderWidth: 1, borderColor: '#1e293b' },
+  scoreValue: { fontSize: 20, fontWeight: 'bold', marginTop: 2 },
+  grid: { flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 12 },
+  miniCard: { width: '48%', backgroundColor: '#0f1e40', padding: 12, borderRadius: 12, alignItems: 'center' },
+  miniLabel: { color: C.textSecond, fontSize: 11, marginTop: 4 },
+  miniValue: { color: C.white, fontSize: 16, fontWeight: 'bold', marginTop: 2 },
+  mainCard: { backgroundColor: '#0f1e40', padding: 16, borderRadius: 12, marginBottom: 12 },
+  cardTitle: { color: C.white, fontWeight: 'bold', fontSize: 14, marginBottom: 12, textAlign: 'right' },
+  row: { flexDirection: 'row-reverse', alignItems: 'center' },
+  statText: { color: C.white, fontSize: 12, marginBottom: 6, textAlign: 'right' },
+  sectionTitle: { color: C.white, fontSize: 18, fontWeight: 'bold', marginBottom: 12, textAlign: 'right' },
+  sliderLabel: { color: C.white, fontSize: 12, textAlign: 'right', marginBottom: 6 },
+  actionBtn: { backgroundColor: C.cyan, padding: 12, borderRadius: 8, alignItems: 'center', marginTop: 12 },
+  btnText: { color: C.white, fontWeight: 'bold', fontSize: 14 },
+  bullet: { color: C.offWhite, fontSize: 12, textAlign: 'right', lineHeight: 18, marginTop: 4 },
+  input: { backgroundColor: '#1e293b', color: C.white, padding: 10, borderRadius: 8, textAlign: 'center', fontSize: 16, marginBottom: 12 },
+  navBar: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, backgroundColor: '#0f1e40', flexDirection: 'row-reverse', justifyContent: 'space-around', alignItems: 'center', borderTopWidth: 1, borderTopColor: '#1e293b' },
+  navItem: { alignItems: 'center' },
+  navIcon: { fontSize: 18, color: C.textSecond },
+  navLabel: { fontSize: 10, color: C.textSecond, marginTop: 2 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
+  modalBox: { width: '80%', backgroundColor: C.white, padding: 20, borderRadius: 16, alignItems: 'center' },
+});
