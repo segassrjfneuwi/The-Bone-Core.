@@ -27,7 +27,7 @@ const C = {
   border:      '#e2e8f0',
 };
 
-// كود قراءة الحساسات مدمج محلياً لسهولة البناء لـ APK
+// دالة محاكاة الحساسات المدمجة
 const generateLiveSensorData = () => {
   return {
     cervicalAngle: Math.floor(Math.random() * (18 - 8 + 1)) + 8,
@@ -68,14 +68,9 @@ function CircularProgress({ value = 91, size = 160 }) {
         </Defs>
         <Circle cx={cx} cy={cy} r={radius} fill="transparent" stroke="#1e293b" strokeWidth={10} />
         <AnimatedCircle
-          cx={cx} cy={cy} r={radius}
-          fill="transparent"
-          stroke="url(#premiumGrad)"
-          strokeWidth={10}
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          strokeLinecap="round"
-          transform={`rotate(-90 ${cx} ${cy})`}
+          cx={cx} cy={cy} r={radius} fill="transparent" stroke="url(#premiumGrad)"
+          strokeWidth={10} strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round" transform={`rotate(-90 ${cx} ${cy})`}
         />
       </Svg>
       <View style={[StyleSheet.absoluteFillObject, { alignItems: 'center', justifyContent: 'center' }]}>
