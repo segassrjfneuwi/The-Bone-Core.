@@ -7,16 +7,10 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#060c1f",
-    "splash": {
-      "image": "./assets/icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#060c1f"
-    },
     "android": {
       "package": "com.saif.bonecorepro",
       "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#060c1f"
       },
       "permissions": [
