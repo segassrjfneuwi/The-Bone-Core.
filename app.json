@@ -1,31 +1,17 @@
 {
   "expo": {
     "name": "The Bone Core Pro",
-    "slug": "the-bone-core-pro",
-    "version": "1.0.0",
-    "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
-    "backgroundColor": "#060c1f",
     "splash": {
-      "image": "./assets/icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#060c1f"
+      "backgroundColor": "#000000"
     },
     "android": {
-      "package": "com.saif.bonecorepro",
-      "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
-        "backgroundColor": "#060c1f"
-      },
-      "permissions": [
-        "VIBRATE",
-        "BLUETOOTH",
-        "BLUETOOTH_ADMIN",
-        "BLUETOOTH_CONNECT",
-        "INTERNET"
-      ]
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#000000"
+      }
     }
   }
 }
